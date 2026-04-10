@@ -3,61 +3,59 @@
 namespace LBHurtado\ModelInput\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use LBHurtado\ModelInput\Tests\Models\User;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->loginTestUser(); // Log in a test user for all tests
+
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => 'LBHurtado\\ModelInput\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
 
-        // Load configuration files
         $this->loadConfig();
+        $this->loginTestUser();
     }
 
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [
             \LBHurtado\ModelInput\ModelInputServiceProvider::class,
+            \Propaganistas\LaravelPhone\PhoneServiceProvider::class,
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    protected function defineEnvironment($app): void
     {
-        config()->set('database.default', 'testing');
-
-        // Optional: Set web guard as the default
+        $app['config']->set('database.default', 'testing');
         $app['config']->set('auth.defaults.guard', 'web');
-
-        // Run the migration from the local package
-        $userMigration = include __DIR__.'/../database/migrations/test/0001_01_01_000000_create_users_table.php';
-        $userMigration->up();
-        $channelMigration = include __DIR__.'/../database/migrations/2024_08_02_000000_create_inputs_table.php';
-        $channelMigration->up();
     }
 
-    // Define a reusable method for logging in a user
-    protected function loginTestUser()
+    protected function defineDatabaseMigrations(): void
     {
-        $user = new User([
-            'id' => 1, // Unique ID for the user
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-        ]);
-        $user->save();
-        $this->actingAs($user); // Simulate authentication as this user
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
 
-    /**
-     * Load the package configuration files.
-     */
-    protected function loadConfig()
+    protected function loginTestUser(): void
+    {
+        $user = User::query()->firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => 'password',
+            ]
+        );
+
+        $this->actingAs($user, 'web');
+    }
+
+    protected function loadConfig(): void
     {
         $this->app['config']->set(
             'model-input',
