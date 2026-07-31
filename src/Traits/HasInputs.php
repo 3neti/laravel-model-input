@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Validator;
 use LBHurtado\ModelInput\Enums\InputType;
+use LBHurtado\ModelInput\Models\Input;
 
 trait HasInputs
 {
@@ -87,7 +88,7 @@ trait HasInputs
 
     protected function getInputModelClassName(): string
     {
-        return config('model-input.input_model') ?? \LBHurtado\ModelInput\Models\Input::class;
+        return config('model-input.input_model') ?? Input::class;
     }
 
     public function __get($key)

@@ -4,8 +4,10 @@ namespace LBHurtado\ModelInput\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use LBHurtado\ModelInput\ModelInputServiceProvider;
 use LBHurtado\ModelInput\Tests\Models\User;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Propaganistas\LaravelPhone\PhoneServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -26,8 +28,8 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders($app): array
     {
         return [
-            \LBHurtado\ModelInput\ModelInputServiceProvider::class,
-            \Propaganistas\LaravelPhone\PhoneServiceProvider::class,
+            ModelInputServiceProvider::class,
+            PhoneServiceProvider::class,
         ];
     }
 
